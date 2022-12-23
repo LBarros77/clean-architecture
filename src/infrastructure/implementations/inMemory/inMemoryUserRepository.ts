@@ -2,14 +2,14 @@ import { User } from 'domain/entities/User'
 import { UserRepository } from 'domain/repositories/UserRepository'
 
 export class InMemoryUserRepository implements UserRepository {
-	readonly userData: User[] = []
+	private readonly userData: User[] = []
 
 	async getAll(): Promise<User[]> {
 		return this.userData
 	}
 
 	async getByUsername(username: string): Promise<User | null> {
-		const userFound = this.userData.find(x => x.username === username)
+		const userFound = this.userData.find(user => user.username === username)
 
 		if(userFound === undefined) return null
 
@@ -17,17 +17,27 @@ export class InMemoryUserRepository implements UserRepository {
 	}
 
 	async getById(id: string): Promise<User | null> {
-		return null
+		return userData.find(user => user.id === id) // Can implement condictional undefined
 	}
 
 	async update(user: User): Promise<User> {
+		const users = this.userData.filter(usr => usr.id !== user.id)
+		
+		users.push(user)
+
+		this.userData = users
+		
 		return user
 	}
 
-	async delete(user: User): Promise<void> {}
+	async delete(user: User): Promise<void> {
+		const users = this.userData.filter(usr => usr.id !== user.id)
+		this.userData = users
+	}
 
 	async save(user: User): Promise<User> {
 		this.userData.push(user)
+		
 		return user
 	}
 }

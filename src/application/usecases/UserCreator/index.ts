@@ -15,6 +15,8 @@ export class UserCreatorUseCase {
 	async run(body: User): Promise<User> {
 		const existUser: boolean = await this._existUserByUserName.run(body.username)
 
+		if(existUser) throw new UserAlreadyExistsException()
+
 		const userCreated: User = await this._userRepository.save(body)
 
 		return userCreated

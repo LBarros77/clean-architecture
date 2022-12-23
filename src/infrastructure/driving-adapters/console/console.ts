@@ -1,12 +1,14 @@
 import { User } from '../../../domain/entities/User'
-import { UserCreatorUseCase } from '../../../application/usecases/UserCreator'
 import { InMemoryUserRepository } from '../../implementations/inMemory/inMemoryUserRepository'
+import { UserCreatorUseCase } from '../../../application/usecases/UserCreator'
+import { UserGetterUseCase } from '../../../application/usecases/UserGetter'
+import { UserUpdaterUseCase } from '../../../application/usecases/UserUpdater'
+import { UserDeleterUseCase } from '../../../application/usecases/UserDeleter'
 
 (async () => {
 	const inMemoryUserRepo = new InMemoryUserRepository()
 
-	console.log(inMemoryUserRepo.userData)
-
+  // Creating users
 	const userCreatorUseCase = new UserCreatorUseCase(inMemoryUserRepo)
 	const userToCreate: User = {
 		name: 'Luma',
@@ -17,5 +19,24 @@ import { InMemoryUserRepository } from '../../implementations/inMemory/inMemoryU
 
 	await userCreatorUseCase.run(userToCreate)
 
-	console.log(inMemoryUserRepo.userData)
+	// Getting users
+	const userGetterUseCase = new UserGetterUseCase(inMemoryUserRepo)
+	const usersGetted = await userGetterUseCase.run()
+
+	console.log(usersGetted)
+
+	// Updating users
+	const userUpdaterUseCase = new UserUpdaterUseCase(inMemoryUserRepo)
+	const usersUpdated = await userUpdaterUseCase.run({
+		id: '1',
+		username: 'lucinda'
+	})
+
+	// Deleting user by ID
+	const userDeleterUseCase = new UserDeleterUseCase(inMemoryUserRepo)
+	await userDeleterUseCase.run('1')
+
+	const usersGetUpdated = await userGetterUseCase.run()
+
+	console.log(usersGetUpdated)
 })()
