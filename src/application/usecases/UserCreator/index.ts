@@ -1,23 +1,44 @@
-import { User } from '../../../domain/entities/User'
+import { User } from '../../../domain/entities/user/User'
+import { UserAge, UserId, UserName, UserUserName } from '@domain/entities/user/valueObjects'
 import { UserRepository } from '../../../domain/repositories/UserRepository'
 import { ExistUserByUserName } from '../../../domain/services/ExistUserByUserName'
-import { UserAlreadyExistsException } from '../../../domain/exceptions/user/UserAlreadyExistsException'
+import { UuidGenerator } from '@domain/utils/uuidGenerator'
+import { UserAlreadyExistsException, UserIsNotAnAdultException } from '@domain/exceptions'
+
+interface UserInput {
+	name: string
+	age: number
+	username: string
+}
 
 export class UserCreatorUseCase {
 	private readonly _userRepository: UserRepository
 	private readonly _existUserByUserName: ExistUserByUserName
+	private readonly _uuidGenerator: UuidGenerator
 
-	constructor(userRepository: UserRepository) {
+	constructor(userRepository: UserRepository, uuidGenerator: UuidGenerator) {
 		this._userRepository = userRepository
+		this._uuidGenerator = uuidGenerator
 		this._existUserByUserName = new ExistUserByUserName(userRepository)
 	}
 
-	async run(body: User): Promise<User> {
-		const existUser: boolean = await this._existUserByUserName.run(body.username)
+	async run(params: UserInput): Promise<User> {
+		const user = new User({
+			id: new UserId(this._uuidGenerator.generate()),
+			name: new UserName(params.name),
+			username: new UserUserName(params.username),
+			age: new UserAge(params.age)
+		})
+
+		const existUser: boolean = await this._existUserByUserName.run(body.username._value)
 
 		if(existUser) throw new UserAlreadyExistsException()
 
-		const userCreated: User = await this._userRepository.save(body)
+		const isAnAdult = user.isAdult()
+
+	  if(!isAdult) throw new UserAlreadyExistsException()
+
+		const userCreated: User = await this._userRepository.save(user)
 
 		return userCreated
 	}

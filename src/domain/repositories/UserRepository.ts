@@ -1,9 +1,10 @@
-import { User } from '../entities/User'
+import { Nullable } from '@domain/Nullable'
+import { User } from '../entities/user/User'
 
 export interface UserRepository {
 	getAll: () => Promise<User[]>
-	getByUsername: (username: string) => Promise<User | null>
-	getById: (id: string) => Promise<User | null>
+	getByUserName: (username: string) => Promise<Nullable<User>>
+	getById: (id: string) => Promise<<Nullable<User>>
 	update: (user: User) => Promise<User>
 	delete: (user: User) => Promise<void>
 	save: (user: User) => Promise<User>

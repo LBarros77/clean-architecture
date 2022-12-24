@@ -8,7 +8,7 @@ export class ExistUserByUserName {
 	}
 
 	async run(username: string): Promise<boolean> {
-		const user = await this._userRepository.getByUsername(username)
+		const user = await this._userRepository.getByUserName(username)
 
 		return (user !== null)? true : false
 	}
